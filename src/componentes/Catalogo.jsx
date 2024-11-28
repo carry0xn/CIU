@@ -4,7 +4,6 @@ import Carrito from './Carrito'
 export default function Catalogo() {
     const [productos, setProductos] = useState([]) // Estado para almacenar los productos
     
-
     // Obtener productos desde la API
     const obtenerProductos = async () => {
         try {

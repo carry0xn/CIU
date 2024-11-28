@@ -4,6 +4,7 @@ import Footer from './componentes/Footer'
 import Catalogo from './componentes/Catalogo'
 import Fabricantes from './componentes/Fabricantes'
 import Inicio from './componentes/Inicio'
+import Componentes from './componentes/Componentes'
 import { Routes, Route } from 'react-router-dom' // Rutas
 import './App.css'
 
@@ -16,6 +17,7 @@ function App() {
           <Route path="/" element={<Inicio />} /> {/* Ruta raíz */}
           <Route path="/Catalogo" element={<Catalogo />} />
           <Route path="/Fabricantes" element={<Fabricantes />} />
+          <Route path="/Componentes" element={<Componentes />} />
         </Routes>
         <Footer />
       </div>

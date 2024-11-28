@@ -22,6 +22,11 @@ export default function Header() {
                   Fabricantes
                 </Link>
               </li>
+              <li className="nav-item">
+                <Link className="nav-link" to="/Componentes">
+                  Componentes
+                </Link>
+              </li>
             </ul>
           </div>
       </nav>

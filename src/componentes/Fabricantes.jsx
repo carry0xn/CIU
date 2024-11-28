@@ -3,7 +3,6 @@ import React, { useState, useEffect } from 'react'
 export default function DetallesFabricantes() {
   const [fabricantes, setFabricantes] = useState([]) // Lista de fabricantes
   const [productos, setProductos] = useState([]) // Productos del fabricante seleccionado
-  const [componentes, setComponentes] = useState([]) // Componentes del producto seleccionado
   const [fabricanteSeleccionado, setFabricanteSeleccionado] = useState(null) // Fabricante seleccionado
   const [productoSeleccionado, setProductoSeleccionado] = useState(null) // Producto seleccionado
 
@@ -12,7 +11,7 @@ export default function DetallesFabricantes() {
     try {
       const response = await fetch('http://localhost:5000/fabricantes/')
       const datos = await response.json()
-      setFabricantes(datos)
+      setFabricantes(datos) // Asegúrate de que `datos` sea un arreglo
     } catch (error) {
       console.error('Error al obtener fabricantes:', error)
     }
@@ -23,90 +22,68 @@ export default function DetallesFabricantes() {
     try {
       const response = await fetch(`http://localhost:5000/fabricantes/${idFabricante}/productos`)
       const datos = await response.json()
-      setProductos(datos.Productos) // Guardar los productos
-      setFabricanteSeleccionado(idFabricante) // Guardar el fabricante seleccionado
-      setComponentes([]) // Limpiar componentes al cambiar de fabricante
+      setProductos(datos.Productos || datos) // Maneja posibles estructuras de datos
+      setFabricanteSeleccionado(idFabricante)
       setProductoSeleccionado(null) // Limpiar producto seleccionado
     } catch (error) {
       console.error('Error al obtener productos del fabricante:', error)
     }
   }
 
-  // Obtener componentes de un producto específico
-  const obtenerComponentesProducto = async (idProducto) => {
-    try {
-      const response = await fetch(`http://localhost:5000/productos/${idProducto}/componentes`)
-      const datos = await response.json()
-      setComponentes(datos.Componentes) // Guardar los componentes
-      setProductoSeleccionado(idProducto) // Guardar el producto seleccionado
-    } catch (error) {
-      console.error('Error al obtener componentes del producto:', error)
-    }
-  }
-
-  // Cargar fabricantes al montar el componente
   useEffect(() => {
     obtenerFabricantes()
   }, [])
 
   return (
     <div className="container mt-5">
-      <h1>Fabricantes</h1>
-      <ul className="list-group">
-        {fabricantes.map((fabricante) => (
-          <li
-            key={fabricante.id}
-            className={`list-group-item ${
-              fabricanteSeleccionado === fabricante.id ? 'active' : ''
-            }`}
-            onClick={() => obtenerProductosFabricante(fabricante.id)}
-            style={{ cursor: 'pointer' }}
-          >
-            {fabricante.nombre}
-          </li>
-        ))}
-      </ul>
-
-      {fabricanteSeleccionado && (
-        <div className="detalles-container">
-          <h2>Productos del fabricante</h2>
-          {productos.length > 0 ? (
+      <div className="row">
+        {/* Lista de fabricantes */}
+        <div className="col-md-6">
+          <h1>Fabricantes</h1>
+          {fabricantes.length > 0 ? (
             <ul className="list-group">
-              {productos.map((producto) => (
+              {fabricantes.map((fabricante) => (
                 <li
-                  key={producto.id}
+                  key={fabricante.id}
                   className={`list-group-item ${
-                    productoSeleccionado === producto.id ? 'active' : ''
+                    fabricanteSeleccionado === fabricante.id ? 'active' : ''
                   }`}
-                  onClick={() => obtenerComponentesProducto(producto.id)}
+                  onClick={() => obtenerProductosFabricante(fabricante.id)}
                   style={{ cursor: 'pointer' }}
                 >
-                  {producto.nombre} - ${producto.precio}
+                  {fabricante.nombre}
                 </li>
               ))}
             </ul>
           ) : (
-            <p>Este fabricante no tiene productos.</p>
+            <p>No hay fabricantes disponibles.</p>
           )}
 
-          {productoSeleccionado && (
-            <>
-              <h2>Componentes del producto</h2>
-              {componentes.length > 0 ? (
+          {fabricanteSeleccionado && (
+            <div className="mt-4">
+              <h2>Productos del fabricante</h2>
+              {productos.length > 0 ? (
                 <ul className="list-group">
-                  {componentes.map((componente) => (
-                    <li key={componente.id} className="list-group-item">
-                      <strong>{componente.nombre}</strong>: {componente.descripcion}
+                  {productos.map((producto) => (
+                    <li
+                      key={producto.id}
+                      className={`list-group-item ${
+                        productoSeleccionado === producto.id ? 'active' : ''
+                      }`}
+                      onClick={() => setProductoSeleccionado(producto.id)}
+                      style={{ cursor: 'pointer' }}
+                    >
+                      {producto.nombre} - ${producto.precio}
                     </li>
                   ))}
                 </ul>
               ) : (
-                <p>Este producto no tiene componentes.</p>
+                <p>Este fabricante no tiene productos.</p>
               )}
-            </>
+            </div>
           )}
         </div>
-      )}
+      </div>
     </div>
   )
 }
