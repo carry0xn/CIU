@@ -1,79 +1,82 @@
 import React, { useState, useEffect } from 'react'
+import { getComponentes, getProductoDeComponentes } from './Api'
 
+export default function ListaComponentes() {
+  const [componentes, setComponentes] = useState([]) // Lista de componentes
+  const [productos, setProductos] = useState([]) // Productos del componente seleccionado
+  const [componenteSeleccionado, setComponenteSeleccionado] = useState(null) // Componente seleccionado
 
-export default function Componentes() {
-    const [productos, setProductos] = useState([]) // Productos del fabricante seleccionado
-    const [componentes, setComponentes] = useState([]) // Lista de componentes
-    const [componenteSeleccionado, setComponenteSeleccionado] = useState(null) // Componente seleccionado
-    const [productoSeleccionado, setProductoSeleccionado] = useState(null) // Producto seleccionado
-
-      // Obtener todos los componentes desde la API
-    const obtenerComponentes = async () => {
-        try {
-        const response = await fetch('http://localhost:5000/componentes/')
-        const datos = await response.json()
-        setComponentes(datos) // Asegúrate de que `datos` sea un arreglo
-        } catch (error) {
+  useEffect(() => {
+    // Obtener todos los componentes desde la API, carga los componentes al inicializar.
+    // Este efecto se ejecuta una sola vez.
+    const fetchComponente = async () => {
+      try {
+        const datos = await getComponentes()
+        setComponentes(datos)
+      } catch (error) {
         console.error('Error al obtener componentes:', error)
-        }
+      }
     }
 
-      // Obtener productos de un componente específico
-    const obtenerProductosComponentes = async (idComponentes) => {
-        try {
-        const response = await fetch(`http://localhost:5000/componentes/${idComponentes}/productos`)
-        const datos = await response.json()
-        setProductos(datos.Productos || datos) // Maneja posibles estructuras de datos
-        setComponenteSeleccionado(idComponentes)
-        setProductoSeleccionado(null) // Limpiar producto seleccionado
-        } catch (error) {
-        console.error('Error al obtener productos del fabricante:', error)
-        }
+    fetchComponente()
+  }, [])
+
+  // Manejo de los productos y componente seleccionado
+  const handleComponenteClick = async (componente) => {
+    try {
+      const datos = await getProductoDeComponentes(componente.id)
+      setProductos(datos) // Establecer los productos correctamente
+      setComponenteSeleccionado(componente) // Guardar el objeto del componente seleccionado
+    } catch (error) {
+      console.error('Error al obtener productos del componente:', error)
     }
-
-    useEffect(() => {
-        obtenerComponentes() // Cargar componentes también al inicio
-    }, [])
-
+  }
 
   return (
-    <div>
-      {/* Lista de componentes */}
-      <div className="col-md-6">
+    <div className="container mt-5 py-5">
+      <div className="row">
+        {/* Lista de componentes */}
+        <div className="col-md-6">
           <h1>Componentes</h1>
           {componentes.length > 0 ? (
             <ul className="list-group">
               {componentes.map((componente) => (
                 <li
                   key={componente.id}
-                  className={`list-group-item ${
-                    componenteSeleccionado === componente.id ? 'active' : ''
-                  }`}
-                  onClick={() => obtenerProductosComponentes(componente.id)}
+                  className={`list-group-item ${componenteSeleccionado?.id === componente.id ? 'active' : ''}`}
+                  onClick={() => handleComponenteClick(componente)}
                   style={{ cursor: 'pointer' }}
-                  >
+                >
                   {componente.nombre}
-              </li>
+                </li>
               ))}
             </ul>
           ) : (
             <p>No hay componentes disponibles.</p>
           )}
+        </div>
 
-        {componenteSeleccionado && (
+        {/* Detalles del componente */}
+        <div className="col-md-6">
+          {componenteSeleccionado ? (
+            <div className="card">
+              <div className="card-body">
+                <h2 className="card-title">{componenteSeleccionado.nombre}</h2>
+                <p className="card-text"><strong>Descripción:</strong> {componenteSeleccionado.descripcion}</p>
+              </div>
+            </div>
+          ) : (
+            <p>Selecciona un componente para ver más información.</p>
+          )}
+
+          {/* Lista de productos del componente */}
+          {componenteSeleccionado && (
             <div className="mt-4">
-              <h2>Productos del fabricante</h2>
+              <h2>Productos del componente</h2>
               {productos.length > 0 ? (
                 <ul className="list-group">
                   {productos.map((producto) => (
-                    <li
-                      key={producto.id}
-                      className={`list-group-item ${
-                        productoSeleccionado === producto.id ? 'active' : ''
-                      }`}
-                      onClick={() => setProductoSeleccionado(producto.id)}
-                      style={{ cursor: 'pointer' }}
-                    >
+                    <li key={producto.id} className="list-group-item">
                       {producto.nombre} - ${producto.precio}
                     </li>
                   ))}
@@ -84,6 +87,7 @@ export default function Componentes() {
             </div>
           )}
         </div>
+      </div>
     </div>
   )
 }

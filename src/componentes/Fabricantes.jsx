@@ -1,41 +1,39 @@
 import React, { useState, useEffect } from 'react'
+import { getFabricantes, getProductoDeFabricantes } from './Api'
 
-export default function DetallesFabricantes() {
+export default function ListaFabricantes() {
   const [fabricantes, setFabricantes] = useState([]) // Lista de fabricantes
   const [productos, setProductos] = useState([]) // Productos del fabricante seleccionado
   const [fabricanteSeleccionado, setFabricanteSeleccionado] = useState(null) // Fabricante seleccionado
-  const [productoSeleccionado, setProductoSeleccionado] = useState(null) // Producto seleccionado
 
-  // Obtener todos los fabricantes desde la API
-  const obtenerFabricantes = async () => {
-    try {
-      const response = await fetch('http://localhost:5000/fabricantes/')
-      const datos = await response.json()
-      setFabricantes(datos) // Asegúrate de que `datos` sea un arreglo
-    } catch (error) {
-      console.error('Error al obtener fabricantes:', error)
+  useEffect(() => {
+    // Obtener todos los fabricantes desde la API, carga los fabricantes al inicializar el componente.
+    // Este efecto se ejecuta una sola vez.
+    const fetchFabricantes = async () => {
+      try {
+        const datos = await getFabricantes()
+        setFabricantes(datos)
+      } catch (error) {
+        console.error('Error al obtener fabricantes:', error)
+      }
     }
-  }
 
-  // Obtener productos de un fabricante específico
-  const obtenerProductosFabricante = async (idFabricante) => {
+    fetchFabricantes()
+  }, [])
+
+  // Manejo de los productos y fabricante seleccionado
+  const handleFabricanteClick = async (fabricante) => {
     try {
-      const response = await fetch(`http://localhost:5000/fabricantes/${idFabricante}/productos`)
-      const datos = await response.json()
-      setProductos(datos.Productos || datos) // Maneja posibles estructuras de datos
-      setFabricanteSeleccionado(idFabricante)
-      setProductoSeleccionado(null) // Limpiar producto seleccionado
+      const datos = await getProductoDeFabricantes(fabricante.id)
+      setProductos(datos) // Establecer los productos correctamente
+      setFabricanteSeleccionado(fabricante) // Guardar el objeto del fabricante seleccionado
     } catch (error) {
       console.error('Error al obtener productos del fabricante:', error)
     }
   }
 
-  useEffect(() => {
-    obtenerFabricantes()
-  }, [])
-
   return (
-    <div className="container mt-5">
+    <div className="container mt-5 py-5">
       <div className="row">
         {/* Lista de fabricantes */}
         <div className="col-md-6">
@@ -45,10 +43,8 @@ export default function DetallesFabricantes() {
               {fabricantes.map((fabricante) => (
                 <li
                   key={fabricante.id}
-                  className={`list-group-item ${
-                    fabricanteSeleccionado === fabricante.id ? 'active' : ''
-                  }`}
-                  onClick={() => obtenerProductosFabricante(fabricante.id)}
+                  className={`list-group-item ${fabricanteSeleccionado?.id === fabricante.id ? 'active' : ''}`}
+                  onClick={() => handleFabricanteClick(fabricante)}
                   style={{ cursor: 'pointer' }}
                 >
                   {fabricante.nombre}
@@ -58,21 +54,37 @@ export default function DetallesFabricantes() {
           ) : (
             <p>No hay fabricantes disponibles.</p>
           )}
+        </div>
 
+        {/* Descripción del fabricante */}
+        <div className="col-md-6">
+          {fabricanteSeleccionado ? (
+            <div className="card">
+              <div className="card-body">
+                <h2 className="card-title">{fabricanteSeleccionado.nombre}</h2>
+                <p className="card-text"><strong>Dirección:</strong> {fabricanteSeleccionado.direccion}</p>
+                <p className="card-text"><strong>Contacto:</strong> {fabricanteSeleccionado.numeroContacto}</p>
+                {fabricanteSeleccionado.pathImgPerfil && (
+                  <img
+                    src={`/${fabricanteSeleccionado.pathImgPerfil}`}
+                    alt={`Imagen de ${fabricanteSeleccionado.nombre}`}
+                    className="card-img-top"
+                  />
+                )}
+              </div>
+            </div>
+          ) : (
+            <p>Selecciona un fabricante para ver más información.</p>
+          )}
+
+          {/* Lista de productos del fabricante */}
           {fabricanteSeleccionado && (
             <div className="mt-4">
               <h2>Productos del fabricante</h2>
               {productos.length > 0 ? (
                 <ul className="list-group">
                   {productos.map((producto) => (
-                    <li
-                      key={producto.id}
-                      className={`list-group-item ${
-                        productoSeleccionado === producto.id ? 'active' : ''
-                      }`}
-                      onClick={() => setProductoSeleccionado(producto.id)}
-                      style={{ cursor: 'pointer' }}
-                    >
+                    <li key={producto.id} className="list-group-item">
                       {producto.nombre} - ${producto.precio}
                     </li>
                   ))}
