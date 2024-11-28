@@ -12,23 +12,16 @@ export default function Carrito() {
       const productosData = await getProductos()
       setProductos(productosData)
     }
+    
     fetchProductos()
   }, []) // El array vacío asegura que esto se ejecute solo una vez al montar el componente
 
   // Función para incrementar la cantidad de un producto en el carrito
   const incrementarCantidad = (id) => {
-    setCarrito((prevCarrito) => {
-      const cantidadActual = prevCarrito[id] || 0
-      if (cantidadActual >= 5) {
-        // Mostrar mensaje si ya alcanzó el límite de 5 unidades
-        alert('No quedan más unidades disponibles')
-        return prevCarrito
-      }
-      return {
-        ...prevCarrito, // Copia el estado actual del carrito
-        [id]: cantidadActual + 1,
-      }
-    })
+    setCarrito((prevCarrito) => ({
+      ...prevCarrito, // Copia el estado actual del carrito
+      [id]: (prevCarrito[id] || 0) + 1,
+    }))
   }
 
   // Función para decrementar la cantidad de un producto en el carrito
@@ -50,10 +43,6 @@ export default function Carrito() {
   // Función para manejar el clic en un producto y mostrar sus detalles
   const verDetallesProducto = (producto) => {
     setProductoSeleccionado(producto)
-    // Mostrar mensaje si el producto seleccionado es Smartwatch
-    if (producto.nombre === 'Smartwatch') {
-      alert('Quedan 5 unidades')
-    }
   }
 
   return (
@@ -108,7 +97,7 @@ export default function Carrito() {
                 <button
                   className="btn btn-outline-danger"
                   onClick={(e) => {
-                    // Asegura que solo cargue el producto que queremos y no los demás
+                    // Asegura que solo cargue el producto que queremos y no los demas
                     e.stopPropagation()
                     decrementarCantidad(producto.id)
                   }}
@@ -133,4 +122,3 @@ export default function Carrito() {
     </div>
   )
 }
-

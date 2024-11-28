@@ -2,19 +2,12 @@ import React from "react"
 import interior from "/images/productos/Interior.jpg"
 import mejores_productos from "/images/productos/MejoresProductos.jpg"
 import clientes from "/images/productos/clientes.jpg"
-import logo from "/images/logo.png"
 
 export default function Inicio() {
   return (
     <section>
       <section id="presentacion" className="py-5 bg-light">
         <div className="container">
-          <img
-            src={logo}
-            alt="Logo de TechMarket"
-            className="d-block mx-auto mb-4"
-            style={{ maxWidth: "300px" }}
-          />
           <h2 className="text-center mb-4">Quiénes Somos</h2>
           <p className="lead text-center">
             En <strong>TechMarket</strong> nos guiamos por cuatro principios fundamentales: pasión por la innovación, excelencia operativa, enfoque en nuestros clientes y visión a largo plazo. Nos esforzamos por ser el lugar ideal para encontrar productos tecnológicos de calidad, destacándonos como una empresa confiable y centrada en la satisfacción de nuestros clientes.
